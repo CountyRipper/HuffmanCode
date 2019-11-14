@@ -1,3 +1,6 @@
+#ifndef _HUFFMAN_H_
+#define _HUFFMAN_H_
+
 #include <stddef.h>
 #include <string>
 #include <fstream>
@@ -33,7 +36,7 @@ void GetCodeInfo(ifstream &infile,OriginInfo *OriginInfo_arr);
 template<class CharType>
 struct huffmanNode
 {
-    CharType data;
+    CharType data;//字符
     huffmanNode<CharType> *leftChild;//左孩子指针域
     huffmanNode<CharType> *rightChild;//右孩子指针域
     huffmanNode<CharType> *parent;//双亲节点
@@ -56,5 +59,7 @@ class HuffmanTree{
     public:
     //huffman树的声明方法
         HuffmanTree();
-        HuffmanTree(OriginInfo[] O1,int n);//由字符，权值以及个数构造Huffman树
+        HuffmanTree(OriginInfo O1[],int n);//由字符，权值以及个数构造Huffman树
 };
+
+#endif
