@@ -1,77 +1,60 @@
-#include<string>
+#include <stddef.h>
+#include <string>
+#include <fstream>
+
 using namespace std;
-//huffman树的构造
-template <class WeightType,class CharType>
-class MyHuffNode{
-    public:
-        virtual WeightType Weight()=0;//返回节点权值
-        virtual bool Isleaf()=0;//判断是否是叶子节点
-        virtual MyHuffNode<CharType,WeightType>* left();//返回节点左孩子
-        virtual MyHuffNode<CharType,WeightType>* right();//返回节点右孩子
-        virtual void SetLeft(MyHuffNode<CharType,WeightType>* child)=0;//设置节点的左孩子
-        virtual void SetRight(MyHuffNode<CharType,WeightType>* child)=0;//设置节点右孩子
 
+//原始文件信息：包括字符，出现频率
+struct OriginInfo
+{
+    char ch;//字符
+    int f;//出现频率
+
+    OriginInfo();
+    OriginInfo(char ch1,int f1){
+        ch=ch1; f=f1;
+    }
+};
+//编码信息，对于每个字符转换后的前缀码
+struct CodeInfo
+{
+    char ch;//字符
+    string strc;//前缀码值
+    CodeInfo();
+    CodeInfo(char ch1,string s1){
+        ch=ch1; strc=s1;
+    }
+};
+//获得需要编码的字符个数
+int getOriginCodeNum(ifstream &infile);
+//得到原始数据信息：即字符及其出现频率并且按照从小到大排序
+void GetCodeInfo(ifstream &infile,OriginInfo *OriginInfo_arr);
+
+template<class CharType>
+struct huffmanNode
+{
+    CharType data;
+    huffmanNode<CharType> *leftChild;//左孩子指针域
+    huffmanNode<CharType> *rightChild;//右孩子指针域
+    huffmanNode<CharType> *parent;//双亲节点
+    int Weight;//权值
+    int huff_code;//编码值
+
+    //构造函数模板
+    huffmanNode();//无参函数构造模板
+    huffmanNode(const CharType &ch=NULL,const int &w=0,const int &huffcode=0,
+    huffmanNode<CharType> *P = NULL,
+    huffmanNode<CharType> *lChild = NULL, huffmanNode<CharType> *rChild = NULL)
 };
 
-//对于叶子节点的声明
-template<class CharType,class WeightType>
-class MyLeafNode:public MyHuffNode<CharType,WeightType>{
-    private:
-        CharType cha;//叶子节点包含的字符
-        WeightType weight;//权值
-
-    public:
-        MyLeafNode(const CharType &ch,const WeightType &w);//构造函数模板
-        virtual ~MyLeafNode(){}//析构函数模板
-        CharType Char();//返回叶节点的字符
-        WeightType Weight();//返回节点权值
-        bool IsLeaf();//判断是否是叶子节点
-        MyHuffNode<CharType,WeightType>* Left();//返回节点左孩子
-        MyHuffNode<CharType,WeightType>* Right();//返回节点右孩子
-        void SetLeft(MyHuffNode<CharType,WeightType>* child)=0;//设置节点的左孩子
-        void SetRight(MyHuffNode<CharType,WeightType>* child)=0;//设置节点右孩子
-
-};
-
-//Huffm树内部节点派生模板
-template<class CharType,class WeightType>
-class MyIntlNode:public MyHuffNode<CharType,WeightType>{
-    private:
-        MyHuffNode<CharType,WeightType>*lChild;//左孩子
-        MyHuffNode<CharType,WeightType>*rChild;//左孩子
-        WeightType weight;//权值
-    public:
-    //  构造函数模板
-        MyIntlNode(
-            MyHuffNode<CharType,WeightType> *lc,MyHuffNode<CharType,WeightType>*rc);
-        virtual ~MyIntlNode(){}//析构函数
-        WeightType Weight();//判断返回节点的权值
-        bool IsLeaf();//判断是否为叶子节点
-        MyHuffNode<CharType,WeightType> *Left();//返回节点的左孩子
-        MyHuffNode<CharType,WeightType> *Right();//返回节点的右孩子
-        void SetLeft(MyHuffNode<CharType,WeightType>* child)=0;//设置节点的左孩子
-        void SetRight(MyHuffNode<CharType,WeightType>* child)=0;//设置节点右孩子
-};
-
-//Huffman树的模板
-
-template<class CharType,class WeightType>
-class MyHuffmanTree{
-    //huffman树数据成员
+template<class CharType>
+class HuffmanTree{
     protected:
-        MyHuffNode<CharType,WeightType>* root;//树根
-        string *charCode;//字符编码信息
-        MyHuffNode<CharType,WeightType>* pCurNode;//译码时从根节点到叶节点；路径的当前节点
-        int leafnum;//叶节点个数
-        unsigned int (*CharIndex)(const CharType &);//字符位置映射
-    //辅助函数模板
-        void CreatCode(MyHuffNode<CharType,WeightType>*r,char code[],int len=0);//生成字符编码
-        void Clear(MyHuffNode<CharType,WeightType>*r);//释放以r为根的树所占用的空间
+        huffmanNode<CharType> *root;//根节点
+        int num;//叶节点(字符)的个数
 
     public:
-        MyHuffmanTree(CharType ch[],WeightType w[],int charnum,
-        unsigned int (*ChIndex)(const CharType &));//由字符，权值，字符个数，字符位置映射构造Huffman树
-        virtual ~MyHuffmanTree();//析构函数
-        string Encode(CharType ch);//编码
-        
-    };
+    //huffman树的声明方法
+        HuffmanTree();
+        HuffmanTree(OriginInfo[] O1,int n);//由字符，权值以及个数构造Huffman树
+};
