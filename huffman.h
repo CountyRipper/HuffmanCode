@@ -48,11 +48,13 @@ struct huffmanNode
     huffmanNode();//无参函数构造模板
     huffmanNode(const CharType &ch,const int &w,
     const char &huffcode=0,
+    huffmanNode<CharType> *P = NULL,
     huffmanNode<CharType> *lChild = NULL,
     huffmanNode<CharType> *rChild = NULL){
         data=ch;
         Weight = w;
         huff_code = huffcode;
+        parent = P;
         leftChild = lChild;
         rightChild = rChild;
     }
@@ -68,6 +70,8 @@ class HuffmanTree{
     //huffman树的声明方法
         HuffmanTree();
         HuffmanTree(OriginInfo Origin);//由字符，权值以及个数构造Huffman树
+        CodeInfo *getHuffmanCode();//获取huffman编码组
 };
+//根据得到的Huffman树获取编码表
 
 #endif

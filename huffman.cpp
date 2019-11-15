@@ -58,6 +58,7 @@ OriginInfo getOriginInfo(string filename){
 
 
 template<class CharType>
+//生成一棵Huffman树
 HuffmanTree<CharType>::HuffmanTree(OriginInfo Origin){
     Leafnum = Origin.num;//获取叶子节点数目
     int Nodesum= 2*Leafnum-1;//总结点数目
@@ -70,14 +71,37 @@ HuffmanTree<CharType>::HuffmanTree(OriginInfo Origin){
         curnum++;
         huffmanNode<CharType> *tmpNode2=new huffmanNode<CharType>(Origin.ch[curnum],Origin.f[curnum],'1');
         //把两颗树合并起来生成父亲节点，为了方便起见，合起来的节点huffman编码值都为'1'
-        huffmanNode<CharType> *sumNode=new huffmanNode<CharType>(NULL,tmpNode1.Weight+tmpNode2.Weight,'1',tmpNode1,tmpNode2);
+        huffmanNode<CharType> *sumNode=new huffmanNode<CharType>(NULL,tmpNode1->Weight+tmpNode2->Weight,'1',tmpNode1,tmpNode2);
+        tmpNode1->parent=sumNode;//设置父节点
+        tmpNode2->parent=sumNode;//设置父节点
         curnum++;
         while(curnum<Leafnum){
             curnum++;
             //默认新加入的左边节点huffman编码为0
             tmpNode1 = new huffmanNode<CharType>(Origin.ch[curnum],Origin.f[curnum],'0');
             tmpNode2 = sumNode;
-            sumNode = new huffmanNode<CharType>(NULL,tmpNode1.Weight+tmpNode2.Weight,'1',tmpNode1,tmpNode2);
+            sumNode = new huffmanNode<CharType>(NULL,tmpNode1->Weight+tmpNode2->Weight,'1',tmpNode1,tmpNode2);
+            tmpNode1->parent=sumNode;//设置父节点
+            tmpNode2->parent=sumNode;//设置父节点
         }
+        root = sumNode;
+    }
+}
+
+template<class CharType>
+CodeInfo *HuffmanTree<CharType>::getHuffmanCode(){
+    CodeInfo *huffcode_arr = new CodeInfo[Leafnum];//初始化结构体数组存放huffman编码
+    huffmanNode<CharType>* cur =root;//cur为当前节点
+    while(cur!=NULL){
+        cur=cur->rightChild;//把cur移动到最右子树叶子节点
+    }
+    huffcode_arr[0].ch=cur->data;
+    huffcode_arr[0].strc=cur->huff_code;
+    for(int i=1;i<Leafnum;i++){
+        cur=cur->parent;
+        cur=cur->leftChild;
+        huffcode_arr[i].ch=cur->data;//获得huffman内容
+        huffcode_arr[i].strc=huffcode_arr[i-1].strc+cur->huff_code;
+        cur=cur->parent;
     }
 }
