@@ -42,13 +42,20 @@ struct huffmanNode
     huffmanNode<CharType> *rightChild;//右孩子指针域
     huffmanNode<CharType> *parent;//双亲节点
     int Weight;//权值
-    int huff_code;//编码值
+    char huff_code;//编码值
 
     //构造函数模板
     huffmanNode();//无参函数构造模板
-    huffmanNode(const CharType &ch=NULL,const int &w=0,const int &huffcode=0,
-    huffmanNode<CharType> *P = NULL,
-    huffmanNode<CharType> *lChild = NULL, huffmanNode<CharType> *rChild = NULL)
+    huffmanNode(const CharType &ch,const int &w,
+    const char &huffcode=0,
+    huffmanNode<CharType> *lChild = NULL,
+    huffmanNode<CharType> *rChild = NULL){
+        data=ch;
+        Weight = w;
+        huff_code = huffcode;
+        leftChild = lChild;
+        rightChild = rChild;
+    }
 };
 
 template<class CharType>

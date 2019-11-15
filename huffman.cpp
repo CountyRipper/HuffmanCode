@@ -62,11 +62,22 @@ HuffmanTree<CharType>::HuffmanTree(OriginInfo Origin){
     Leafnum = Origin.num;//获取叶子节点数目
     int Nodesum= 2*Leafnum-1;//总结点数目
     if(Leafnum==1){
-        root = new huffmanNode(Origin.ch[0],Origin.f[0]);
+        root = new huffmanNode<CharType>(Origin.ch[0],Origin.f[0]);
     }
     else{
         int curnum=0;
-        huffmanNode<CharType> tmpNode1=new huffmanNode(Origin.ch[curnum],Origin.f[curnum],0);
-        
+        huffmanNode<CharType> *tmpNode1=new huffmanNode<CharType>(Origin.ch[curnum],Origin.f[curnum],'0');
+        curnum++;
+        huffmanNode<CharType> *tmpNode2=new huffmanNode<CharType>(Origin.ch[curnum],Origin.f[curnum],'1');
+        //把两颗树合并起来生成父亲节点，为了方便起见，合起来的节点huffman编码值都为'1'
+        huffmanNode<CharType> *sumNode=new huffmanNode<CharType>(NULL,tmpNode1.Weight+tmpNode2.Weight,'1',tmpNode1,tmpNode2);
+        curnum++;
+        while(curnum<Leafnum){
+            curnum++;
+            //默认新加入的左边节点huffman编码为0
+            tmpNode1 = new huffmanNode<CharType>(Origin.ch[curnum],Origin.f[curnum],'0');
+            tmpNode2 = sumNode;
+            sumNode = new huffmanNode<CharType>(NULL,tmpNode1.Weight+tmpNode2.Weight,'1',tmpNode1,tmpNode2);
+        }
     }
 }
