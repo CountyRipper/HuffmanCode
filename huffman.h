@@ -10,12 +10,14 @@ using namespace std;
 //原始文件信息：包括字符，出现频率
 struct OriginInfo
 {
-    char ch;//字符
-    int f;//出现频率
-
-    OriginInfo();
-    OriginInfo(char ch1,int f1){
-        ch=ch1; f=f1;
+    char* ch;//字符
+    int* f;//出现频率
+    int num;//共有多少个字符
+    OriginInfo(){
+        num=0;
+    }
+    OriginInfo(char *ch1,int *f1,int n){
+        ch=ch1; f=f1; num=n;
     }
 };
 //编码信息，对于每个字符转换后的前缀码
@@ -28,10 +30,9 @@ struct CodeInfo
         ch=ch1; strc=s1;
     }
 };
-//获得需要编码的字符个数
-int getOriginCodeNum(ifstream &infile);
-//得到原始数据信息：即字符及其出现频率并且按照从小到大排序
-void GetCodeInfo(ifstream &infile,OriginInfo *OriginInfo_arr);
+//获得需要编码的字符个数,字符及其出现频率并且按照从小到大排序
+OriginInfo getOriginInfo(string filename);
+
 
 template<class CharType>
 struct huffmanNode
@@ -54,12 +55,12 @@ template<class CharType>
 class HuffmanTree{
     protected:
         huffmanNode<CharType> *root;//根节点
-        int num;//叶节点(字符)的个数
+        int Leafnum;//叶节点(字符)的个数
 
     public:
     //huffman树的声明方法
         HuffmanTree();
-        HuffmanTree(OriginInfo O1[],int n);//由字符，权值以及个数构造Huffman树
+        HuffmanTree(OriginInfo Origin);//由字符，权值以及个数构造Huffman树
 };
 
 #endif
