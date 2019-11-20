@@ -1,11 +1,11 @@
 #include "huffman.h"
 
-OriginInfo getOriginInfo(string filename){
+vector<OriginInfo> getOriginInfo(string filename){
     fstream infile;
     infile.open(filename);
     infile.seekg(ios::beg);
     char curchar;//文件读取的当前字符数
-    int count;//文件计数
+    int count=0;//文件计数
     string text;
     char ch1[128];//统计字符元素
     int f1[128]={0};//统计字符出现频率
@@ -36,9 +36,16 @@ OriginInfo getOriginInfo(string filename){
         }
         f1[i]=count1;
     }
-    OriginInfo O1(ch1,f1,count);
-    //排序O1
-    for(int i=count-1;i>0;i--){
+    vector<OriginInfo> OV1;
+    OriginInfo O1;
+    for(int i=0;i<count;i++){
+        O1.ch=ch1[i];
+        O1.f=f1[i];
+        OV1.push_back(O1);
+    }
+    //排序OV1
+    sort(OV1.begin(),OV1.end(),LessSort);
+    /*for(int i=count-1;i>0;i--){
         for(int j=i;j>0;j--){
             if(O1.f[j]<O1.f[j-1]){
                 //如果频率更小就跟前一个替换
@@ -51,34 +58,37 @@ OriginInfo getOriginInfo(string filename){
                 O1.f[j-1]=tmpf;
             }
         }
-    }
-    return O1;
+    }*/
+    return OV1;
 }
 
 
 
 template<class CharType>
 //生成一棵Huffman树
-HuffmanTree<CharType>::HuffmanTree(OriginInfo Origin){
-    Leafnum = Origin.num;//获取叶子节点数目
+HuffmanTree<CharType>::HuffmanTree(vector<OriginInfo> Origin_V){
+    Leafnum = Origin_V.size();//获取叶子节点数目
     int Nodesum= 2*Leafnum-1;//总结点数目
     if(Leafnum==1){
-        root = new huffmanNode<CharType>(Origin.ch[0],Origin.f[0]);
+        root = new huffmanNode<CharType>(Origin_V[0].ch,Origin_V[0].f);
     }
     else{
         int curnum=0;
-        huffmanNode<CharType> *tmpNode1=new huffmanNode<CharType>(Origin.ch[curnum],Origin.f[curnum],'0');
+        huffmanNode<CharType> *tmpNode1=new huffmanNode<CharType>(Origin_V[curnum].ch,Origin_V[curnum].f,'0');
         curnum++;
-        huffmanNode<CharType> *tmpNode2=new huffmanNode<CharType>(Origin.ch[curnum],Origin.f[curnum],'1');
+        huffmanNode<CharType> *tmpNode2=new huffmanNode<CharType>(Origin_V[curnum].ch,Origin_V[curnum].f,'1');
         //把两颗树合并起来生成父亲节点，为了方便起见，合起来的节点huffman编码值都为'1'
         huffmanNode<CharType> *sumNode=new huffmanNode<CharType>(NULL,tmpNode1->Weight+tmpNode2->Weight,'1',tmpNode1,tmpNode2);
         tmpNode1->parent=sumNode;//设置父节点
         tmpNode2->parent=sumNode;//设置父节点
+        OriginInfo sumO(NULL,tmpNode1->Weight+tmpNode2->Weight);
         curnum++;
+        Origin_V.push_back(sumO);
+        sort(Origin_V.begin(),Origin_V.end(),LessSort);//再次排序，始终由小到大
         while(curnum<Leafnum){
             curnum++;
             //默认新加入的左边节点huffman编码为0
-            tmpNode1 = new huffmanNode<CharType>(Origin.ch[curnum],Origin.f[curnum],'0');
+            tmpNode1 = new huffmanNode<CharType>(Origin_V[curnum].ch,Origin_V[curnum].f,'0');
             tmpNode2 = sumNode;
             sumNode = new huffmanNode<CharType>(NULL,tmpNode1->Weight+tmpNode2->Weight,'1',tmpNode1,tmpNode2);
             tmpNode1->parent=sumNode;//设置父节点

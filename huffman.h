@@ -4,20 +4,18 @@
 #include <stddef.h>
 #include <string>
 #include <fstream>
-
+#include <vector>
+#include <algorithm>
 using namespace std;
 
 //原始文件信息：包括字符，出现频率
 struct OriginInfo
 {
-    char* ch;//字符
-    int* f;//出现频率
-    int num;//共有多少个字符
-    OriginInfo(){
-        num=0;
-    }
-    OriginInfo(char *ch1,int *f1,int n){
-        ch=ch1; f=f1; num=n;
+    char ch;//字符
+    int f;//出现频率
+    OriginInfo();
+    OriginInfo(char ch1,int f1){
+        ch=ch1; f=f1; 
     }
 };
 //编码信息，对于每个字符转换后的前缀码
@@ -31,8 +29,11 @@ struct CodeInfo
     }
 };
 //获得需要编码的字符个数,字符及其出现频率并且按照从小到大排序
-OriginInfo getOriginInfo(string filename);
-
+vector<OriginInfo> getOriginInfo(string filename);
+//用于排序的函数
+bool LessSort(OriginInfo a,OriginInfo b){
+    return a.f<b.f;//从小到大排序
+}
 
 template<class CharType>
 struct huffmanNode
@@ -69,7 +70,7 @@ class HuffmanTree{
     public:
     //huffman树的声明方法
         HuffmanTree();
-        HuffmanTree(OriginInfo Origin);//由字符，权值以及个数构造Huffman树
+        HuffmanTree(vector<OriginInfo> Origin_V);//由字符，权值以及个数构造Huffman树
         CodeInfo *getHuffmanCode();//获取huffman编码组
 };
 //根据得到的Huffman树获取编码表
