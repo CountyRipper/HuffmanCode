@@ -1,7 +1,5 @@
-#include <iostream>
 #include "huffman.h"
-#include "huffman.cpp"
 
 int main(int, char**) {
-    
+    return 0;
 }
