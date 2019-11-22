@@ -1,117 +1,68 @@
 #include "huffman.h"
 
-vector<OriginInfo> getOriginInfo(string filename){
-    fstream infile;
-    infile.open(filename);
-    infile.seekg(ios::beg);
-    char curchar;//文件读取的当前字符数
-    int count=0;//文件计数
-    string text;
-    char ch1[128];//统计字符元素
-    int f1[128]={0};//统计字符出现频率
-    while(!infile.eof()){
-        curchar=infile.get();
-        text+=curchar;
-    }
-
-    for(int i=0;i<text.length();i++){
-        int flag=0;//用来判定之前是否出现了重复字符，出现了就为1
-        for(int j=0;j<i;j++){
-            if(text[i]==ch1[j]){
-                flag=1;
-                break;
-            }
-        }
-        if(!flag){
-            ch1[i]=text[i];//如果没有出现就放入ch1数组中
-            count++;
+template<class CharType>
+//从node[1~cur]中选择 双亲为0，权值最小的两个结点r1,r2
+void HuffmanTree<CharType>::Select(int cur,int &r1,int &r2){
+    int min1,min2;
+    min1=1;
+    for(int i=1;i<=cur;i++){
+        if(nodes[i].parent==0&&nodes[i].weight<=nodes[min1].weight){
+            min1=i;
         }
     }
-    for(int i=0;i<count;i++){
-        int count1=0;//标记单个字符频率
-        for(int j=0;j<text.length();j++){
-            if(text[j]==ch1[i]){
-                count1++;
-            }
+    min2=(min1+1)%cur;
+    for(int i=1;i<=cur;i++){
+        if(nodes[i].parent==0&&nodes[i].weight<=nodes[min2]&&i!=min1){
+            min2=i;
         }
-        f1[i]=count1;
     }
-    vector<OriginInfo> OV1;
-    OriginInfo O1;
-    for(int i=0;i<count;i++){
-        O1.ch=ch1[i];
-        O1.f=f1[i];
-        OV1.push_back(O1);
-    }
-    //排序OV1
-    sort(OV1.begin(),OV1.end(),LessSort);
-    /*for(int i=count-1;i>0;i--){
-        for(int j=i;j>0;j--){
-            if(O1.f[j]<O1.f[j-1]){
-                //如果频率更小就跟前一个替换
-                char tmpchar,tmpf;
-                tmpchar = O1.ch[j];
-                tmpf = O1.f[j];
-                O1.ch[j]=O1.ch[j-1];
-                O1.f[j]=O1.f[j-1];
-                O1.ch[j-1]=tmpchar;
-                O1.f[j-1]=tmpf;
-            }
-        }
-    }*/
-    return OV1;
+    r1=min1;
+    r2=min2;
 }
 
 
 
-template<class CharType>
-//生成一棵Huffman树
-HuffmanTree<CharType>::HuffmanTree(vector<OriginInfo> Origin_V){
-    Leafnum = Origin_V.size();//获取叶子节点数目
-    int Nodesum= 2*Leafnum-1;//总结点数目
-    if(Leafnum==1){
-        root = new huffmanNode<CharType>(Origin_V[0].ch,Origin_V[0].f);
-    }
-    else{
-        int curnum=0;
-        huffmanNode<CharType> *tmpNode1=new huffmanNode<CharType>(Origin_V[curnum].ch,Origin_V[curnum].f,'0');
-        curnum++;
-        huffmanNode<CharType> *tmpNode2=new huffmanNode<CharType>(Origin_V[curnum].ch,Origin_V[curnum].f,'1');
-        //把两颗树合并起来生成父亲节点，为了方便起见，合起来的节点huffman编码值都为'1'
-        huffmanNode<CharType> *sumNode=new huffmanNode<CharType>(NULL,tmpNode1->Weight+tmpNode2->Weight,'1',tmpNode1,tmpNode2);
-        tmpNode1->parent=sumNode;//设置父节点
-        tmpNode2->parent=sumNode;//设置父节点
-        OriginInfo sumO(NULL,tmpNode1->Weight+tmpNode2->Weight);
-        curnum++;
-        Origin_V.push_back(sumO);
-        sort(Origin_V.begin(),Origin_V.end(),LessSort);//再次排序，始终由小到大
-        while(curnum<Leafnum){
-            curnum++;
-            //默认新加入的左边节点huffman编码为0
-            tmpNode1 = new huffmanNode<CharType>(Origin_V[curnum].ch,Origin_V[curnum].f,'0');
-            tmpNode2 = sumNode;
-            sumNode = new huffmanNode<CharType>(NULL,tmpNode1->Weight+tmpNode2->Weight,'1',tmpNode1,tmpNode2);
-            tmpNode1->parent=sumNode;//设置父节点
-            tmpNode2->parent=sumNode;//设置父节点
-        }
-        root = sumNode;
-    }
-}
+
+
 
 template<class CharType>
-CodeInfo *HuffmanTree<CharType>::getHuffmanCode(){
-    CodeInfo *huffcode_arr = new CodeInfo[Leafnum];//初始化结构体数组存放huffman编码
-    huffmanNode<CharType>* cur =root;//cur为当前节点
-    while(cur!=NULL){
-        cur=cur->rightChild;//把cur移动到最右子树叶子节点
+void HuffmanTree<CharType>::CreatHuffmanTree(CharType ch[],int w[],int n){
+    Leafnum=n;//叶结点个数
+    int Nodenum=2*Leafnum-1;//结点个数
+    nodes = new HuffmanTreeNode[Nodenum+1];//nodes[0]未使用
+    LeafChars = new CharType[n+1];//LeafChars[0]没有使用
+    LeafCharCodes = new string[n+1];//保存叶子节点的编码信息
+    int pos;
+    for(pos=1;pos<=n;pos++){
+        //存储叶结点信息
+        nodes[pos].weight=w[pos-1];//权值
+        LeafChars[pos]=ch[pos-1];//存储字符信息
+
     }
-    huffcode_arr[0].ch=cur->data;
-    huffcode_arr[0].strc=cur->huff_code;
-    for(int i=1;i<Leafnum;i++){
-        cur=cur->parent;
-        cur=cur->leftChild;
-        huffcode_arr[i].ch=cur->data;//获得huffman内容
-        huffcode_arr[i].strc=huffcode_arr[i-1].strc+cur->huff_code;
-        cur=cur->parent;
+    //建立huffman树
+    for(pos=n+1 ;pos<=Nodenum;pos++){
+        int r1,r2;
+        Select(pos-1,r1,r2);
+        //选择双亲为0，权值最小的两个结点r1,r2
+
+        //合并r1,r2为根的树
+        nodes[r1].parent=nodes[r2].parent=pos;//给r1,r2的双亲赋值
+        nodes[pos].leftChild=r1;//左孩子
+        nodes[pos].rightChild=r2;//右孩子
+        nodes[pos].weight=nodes[r1].weight+nodes[r2].weight;//pos权值为r1和r2权值之和
+
     }
+    for(pos=1;pos<=n;pos++){
+        //求n个叶结点的
+        list<char> CharCode;//暂存叶结点的字符编码信息
+        for(unsigned int child=pos,parent =nodes[child].parent;parent!=0;child=parent,parent=nodes[child].parent){
+            //从叶结点逆向求编码
+            if(nodes[parent].leftChild==child) CharCode.push_back('0');//左儿子为'0'
+            else CharCode.push_back('1');//右分支为'1'
+        }
+        for(int i=0;i<CharCode.size();i++){
+            LeafCharCodes[pos].push_back(CharCode[i]);
+        }
+    }
+
 }

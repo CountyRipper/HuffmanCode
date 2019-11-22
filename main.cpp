@@ -1,6 +1,7 @@
 #include <iostream>
 #include "huffman.h"
+#include "huffman.cpp"
 
 int main(int, char**) {
-    std::cout << "Hello, world!\n";
+    
 }

@@ -4,75 +4,42 @@
 #include <stddef.h>
 #include <string>
 #include <fstream>
-#include <vector>
-#include <algorithm>
+#include <list>
 using namespace std;
 
-//原始文件信息：包括字符，出现频率
-struct OriginInfo
-{
-    char ch;//字符
-    int f;//出现频率
-    OriginInfo();
-    OriginInfo(char ch1,int f1){
-        ch=ch1; f=f1; 
-    }
-};
-//编码信息，对于每个字符转换后的前缀码
-struct CodeInfo
-{
-    char ch;//字符
-    string strc;//前缀码值
-    CodeInfo();
-    CodeInfo(char ch1,string s1){
-        ch=ch1; strc=s1;
-    }
-};
-//获得需要编码的字符个数,字符及其出现频率并且按照从小到大排序
-vector<OriginInfo> getOriginInfo(string filename);
-//用于排序的函数
-bool LessSort(OriginInfo a,OriginInfo b){
-    return a.f<b.f;//从小到大排序
-}
-
-template<class CharType>
-struct huffmanNode
-{
-    CharType data;//字符
-    huffmanNode<CharType> *leftChild;//左孩子指针域
-    huffmanNode<CharType> *rightChild;//右孩子指针域
-    huffmanNode<CharType> *parent;//双亲节点
-    int Weight;//权值
-    char huff_code;//编码值
-
+struct HuffmanTreeNode{
+    //数据成员
+    int weight;
+    unsigned int parent,leftChild,rightChild;//双亲，左右儿子的数据
     //构造函数模板
-    huffmanNode();//无参函数构造模板
-    huffmanNode(const CharType &ch,const int &w,
-    const char &huffcode=0,
-    huffmanNode<CharType> *P = NULL,
-    huffmanNode<CharType> *lChild = NULL,
-    huffmanNode<CharType> *rChild = NULL){
-        data=ch;
-        Weight = w;
-        huff_code = huffcode;
-        parent = P;
-        leftChild = lChild;
-        rightChild = rChild;
-    }
-};
+    HuffmanTreeNode();
+    HuffmanTreeNode(int w,int p=0 ,int lChild=0,int rChild=0);//已知双亲，左右儿子，权值
 
+};
+//哈夫曼树
 template<class CharType>
 class HuffmanTree{
-    protected:
-        huffmanNode<CharType> *root;//根节点
-        int Leafnum;//叶节点(字符)的个数
+protected:
+    //哈夫曼树数据成员
+    HuffmanTreeNode *nodes;//存储结点信息；
+    CharType* LeafChars;//叶节点信息；
+    string *LeafCharCodes;//叶节点编码信息
+    int curPos;//译码时从根节点到叶节点路径的当前结点
+    int Leafnum;//叶节点个数
 
-    public:
-    //huffman树的声明方法
-        HuffmanTree();
-        HuffmanTree(vector<OriginInfo> Origin_V);//由字符，权值以及个数构造Huffman树
-        CodeInfo *getHuffmanCode();//获取huffman编码组
+    //辅助函数
+    void Select(int cur,int &r1,int &r2);//node[1~cur]中选择双亲为0，权值最小的两个结点r1，r2
+    void CreatHuffmanTree(CharType ch[],int w[],int n);//由字符，权值和字符个数构造哈夫曼树
+
+public:
+    //哈夫曼树方法声明以及重载编译系统默认方法
+    HuffmanTree(CharType ch[],int w[],int n);
+    virtual ~HuffmanTree();
+    string Encode(CharType ch);//对单个字符进行编码
+    list<CharType>Decode(string strCode);//对编码串进行解码
+    HuffmanTree(const HuffmanTree<CharType>&copy);//复制构造函数
+    HuffmanTree<CharType>&operator=(const HuffmanTree<CharType>& copy);//重载赋值构造函数
 };
-//根据得到的Huffman树获取编码表
+
 
 #endif
